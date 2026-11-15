@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Word, Databases & SQL Exam · 50 Items</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: linear-gradient(145deg, #eef3f8 0%, #d4e2f0 100%);
+      font-family: 'Segoe UI', Roboto, system-ui, -apple-system, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    /* ---------- START SCREEN ---------- */
+    .start-screen {
+      max-width: 620px;
+      width: 100%;
+      background: white;
+      border-radius: 36px;
+      box-shadow: 0 24px 48px -12px rgba(0, 30, 60, 0.35);
+      padding: 48px 40px 40px;
+      text-align: center;
+      animation: popIn 0.4s ease;
+    }
+    .start-screen h1 {
+      font-size: 2.1rem;
+      color: #0b2b4f;
+      margin-bottom: 8px;
+      letter-spacing: -0.02em;
+      line-height: 1.25;
+    }
+    .start-screen .subtitle {
+      font-size: 1.08rem;
+      color: #3f5e7a;
+      margin-bottom: 24px;
+    }
+    .start-screen .info-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin-bottom: 30px;
+    }
+    .info-pill {
+      background: #e1edf7;
+      border-radius: 40px;
+      padding: 9px 20px;
+      font-size: 0.9rem;
+      color: #1e4a6b;
+      font-weight: 600;
+    }
+    .start-screen .note {
+      font-size: 0.95rem;
+      color: #7b94ab;
+      margin-bottom: 28px;
+      line-height: 1.55;
+    }
+
+    /* ---------- QUIZ MODAL ---------- */
+    .quiz-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(10, 30, 50, 0.55);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      animation: fadeIn 0.25s ease;
+    }
+    .quiz-overlay.active { display: flex; }
+
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.94) translateY(10px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .quiz-card {
+      background: white;
+      border-radius: 32px;
+      box-shadow: 0 30px 60px -12px rgba(0, 15, 30, 0.45);
+      max-width: 780px;
+      width: 100%;
+      max-height: 92vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      animation: popIn 0.3s ease;
+    }
+
+    /* ---------- QUIZ HEADER ---------- */
+    .quiz-head {
+      background: linear-gradient(135deg, #0b2b4f 0%, #1e4a6b 100%);
+      padding: 22px 32px 18px;
+      color: white;
+      flex-shrink: 0;
+    }
+    .quiz-head .top-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .quiz-head .section-tag {
+      background: rgba(255, 255, 255, 0.14);
+      padding: 5px 16px;
+      border-radius: 40px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+      text-transform: uppercase;
+      color: #d4e8f8;
+      max-width: 70%;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .quiz-head .q-counter {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #b8d4ec;
+      white-space: nowrap;
+    }
+    .quiz-head .q-counter strong { color: white; font-size: 1.15rem; }
+    .progress-track {
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 20px;
+      height: 10px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: #6ab0e8;
+      border-radius: 20px;
+      transition: width 0.35s ease;
+    }
+
+    /* ---------- QUIZ BODY ---------- */
+    .quiz-body {
+      padding: 30px 32px 10px;
+      overflow-y: auto;
+      flex: 1;
+    }
+    .quiz-body::-webkit-scrollbar { width: 6px; }
+    .quiz-body::-webkit-scrollbar-thumb { background: #c8ddec; border-radius: 10px; }
+
+    .question-text {
+      font-size: 1.28rem;
+      font-weight: 600;
+      color: #0b2b4f;
+      line-height: 1.48;
+      margin-bottom: 24px;
+    }
+    .options-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+    .option-btn {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      width: 100%;
+      text-align: left;
+      background: #f8fbfe;
+      border: 2px solid #e2edf8;
+      border-radius: 18px;
+      padding: 15px 20px;
+      font-size: 1.02rem;
+      color: #1f2e3c;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      font-family: inherit;
+      line-height: 1.45;
+      position: relative;
+    }
+    .option-btn:hover:not(:disabled) {
+      border-color: #9dc4e4;
+      background: #f2f9ff;
+    }
+    .option-btn.selected {
+      border-color: #2b6f9e;
+      background: #e1edf7;
+      box-shadow: 0 0 0 3px rgba(43, 111, 158, 0.12);
+    }
+    .option-btn.correct {
+      border-color: #3fa865;
+      background: #e8f7ec;
+      box-shadow: 0 0 0 3px rgba(63, 168, 101, 0.15);
+    }
+    .option-btn.wrong {
+      border-color: #d95c5c;
+      background: #fdeded;
+      box-shadow: 0 0 0 3px rgba(217, 92, 92, 0.15);
+      animation: shake 0.4s ease;
+    }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-6px); }
+      40% { transform: translateX(6px); }
+      60% { transform: translateX(-4px); }
+      80% { transform: translateX(4px); }
+    }
+    .option-btn.correct .option-letter { animation: pulseGreen 0.6s ease; }
+    @keyframes pulseGreen {
+      0% { transform: scale(1); }
+      40% { transform: scale(1.25); background: #3fa865; }
+      100% { transform: scale(1); }
+    }
+    .option-btn:disabled { cursor: default; }
+    .option-letter {
+      background: #e1edf7;
+      color: #1e4a6b;
+      font-weight: 700;
+      font-size: 0.9rem;
+      width: 34px;
+      height: 34px;
+      min-width: 34px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+    }
+    .option-btn.selected:not(.correct):not(.wrong) .option-letter {
+      background: #2b6f9e;
+      color: white;
+    }
+    .option-btn.correct .option-letter { background: #3fa865; color: white; }
+    .option-btn.wrong .option-letter { background: #d95c5c; color: white; }
+    .option-text { padding-top: 5px; flex: 1; }
+    .option-icon { font-size: 1.15rem; margin-left: auto; padding-top: 5px; flex-shrink: 0; }
+
+    /* ---------- FEEDBACK BANNER ---------- */
+    .feedback-banner {
+      display: none;
+      border-radius: 16px;
+      padding: 15px 22px;
+      margin-top: 14px;
+      font-size: 0.98rem;
+      font-weight: 600;
+      line-height: 1.5;
+      align-items: center;
+      gap: 12px;
+    }
+    .feedback-banner.show { display: flex; animation: slideUp 0.3s ease; }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .feedback-banner.correct-fb {
+      background: linear-gradient(135deg, #e8f7ec, #d4f0dc);
+      border-left: 6px solid #3fa865;
+      color: #1d5e35;
+    }
+    .feedback-banner.wrong-fb {
+      background: linear-gradient(135deg, #fdeded, #fbdcdc);
+      border-left: 6px solid #d95c5c;
+      color: #8a2c2c;
+    }
+    .feedback-banner .fb-icon { font-size: 1.7rem; line-height: 1; flex-shrink: 0; }
+    .feedback-banner .fb-text { flex: 1; }
+    .feedback-banner .fb-text strong { font-size: 1.05rem; display: block; margin-bottom: 2px; }
+    .feedback-banner .fb-text span { font-weight: 500; font-size: 0.92rem; }
+
+    /* ---------- QUIZ FOOTER ---------- */
+    .quiz-foot {
+      padding: 18px 32px 24px;
+      background: #f8fbfe;
+      border-top: 1.5px solid #e2edf8;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+      flex-shrink: 0;
+    }
+    .quiz-foot .answered-info {
+      font-size: 0.88rem;
+      color: #5f7e9a;
+      font-weight: 500;
+    }
+    .quiz-foot .btn-group { display: flex; gap: 10px; flex-wrap: wrap; }
+    .btn {
+      font-family: inherit;
+      font-weight: 600;
+      font-size: 0.98rem;
+      padding: 11px 26px;
+      border-radius: 50px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      line-height: 1.2;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn-primary {
+      background: #2b6f9e;
+      color: white;
+      box-shadow: 0 4px 14px rgba(43, 111, 158, 0.35);
+    }
+    .btn-primary:hover { background: #1e5a84; }
+    .btn-primary:disabled {
+      background: #b0c8dd;
+      box-shadow: none;
+      cursor: not-allowed;
+    }
+    .btn-secondary {
+      background: white;
+      color: #1e4a6b;
+      border: 1.5px solid #b8cee0;
+    }
+    .btn-secondary:hover { background: #eef6fe; border-color: #2b6f9e; }
+    .btn-secondary:disabled { opacity: 0.45; cursor: not-allowed; }
+    .btn-submit {
+      background: #d98c2e;
+      color: white;
+      box-shadow: 0 4px 14px rgba(217, 140, 46, 0.35);
+    }
+    .btn-submit:hover { background: #c47a20; }
+    .btn-next-pulse { animation: btnPulse 1.2s ease infinite; }
+    @keyframes btnPulse {
+      0%, 100% { box-shadow: 0 4px 14px rgba(43, 111, 158, 0.35); }
+      50% { box-shadow: 0 4px 22px rgba(43, 111, 158, 0.65); }
+    }
+
+    /* ---------- RESULT SCREEN ---------- */
+    .result-screen {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(10, 30, 50, 0.6);
+      backdrop-filter: blur(6px);
+      z-index: 1100;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .result-screen.active { display: flex; }
+    .result-card {
+      background: white;
+      border-radius: 32px;
+      max-width: 580px;
+      width: 100%;
+      padding: 44px 40px 36px;
+      text-align: center;
+      box-shadow: 0 30px 60px -12px rgba(0, 15, 30, 0.5);
+      animation: popIn 0.4s ease;
+      max-height: 92vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .result-emoji { font-size: 4rem; margin-bottom: 12px; line-height: 1; }
+    .result-card h2 { font-size: 1.9rem; color: #0b2b4f; margin-bottom: 8px; }
+    .result-score {
+      font-size: 3.4rem;
+      font-weight: 700;
+      color: #2b6f9e;
+      margin: 10px 0 4px;
+      letter-spacing: -0.02em;
+    }
+    .result-detail { font-size: 1.08rem; color: #3f5e7a; margin-bottom: 6px; }
+    .result-percent {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #0b2b4f;
+      margin-bottom: 18px;
+    }
+    .result-remark {
+      font-size: 0.98rem;
+      color: #4b6b85;
+      background: #f2f9fe;
+      border-radius: 16px;
+      padding: 16px 20px;
+      margin-bottom: 22px;
+      line-height: 1.5;
+    }
+    .result-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .review-toggle {
+      background: none;
+      border: none;
+      color: #2b6f9e;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      padding: 10px;
+      margin-bottom: 6px;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      font-family: inherit;
+    }
+    .review-list {
+      display: none;
+      text-align: left;
+      max-height: 220px;
+      overflow-y: auto;
+      margin-bottom: 20px;
+      border: 1.5px solid #e2edf8;
+      border-radius: 16px;
+      padding: 12px 16px;
+      background: #f9fcff;
+    }
+    .review-list.show { display: block; }
+    .review-item {
+      padding: 10px 6px;
+      border-bottom: 1px solid #e8f0f8;
+      font-size: 0.9rem;
+      line-height: 1.45;
+    }
+    .review-item:last-child { border-bottom: none; }
+    .review-item .rv-q { font-weight: 600; color: #0b2b4f; margin-bottom: 3px; }
+    .review-item .rv-status { font-weight: 700; }
+    .review-item .rv-status.ok { color: #3c8a5a; }
+    .review-item .rv-status.bad { color: #b34a4a; }
+
+    /* ---------- CONFETTI ---------- */
+    .confetti {
+      position: fixed;
+      width: 10px;
+      height: 10px;
+      border-radius: 2px;
+      top: -20px;
+      z-index: 2000;
+      pointer-events: none;
+      animation: confettiFall linear forwards;
+    }
+    @keyframes confettiFall {
+      to { transform: translateY(105vh) rotate(720deg); opacity: 0.3; }
+    }
+
+    /* ---------- TOASTS ---------- */
+    .correct-toast, .wrong-toast {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0);
+      color: white;
+      font-size: 3rem;
+      width: 110px;
+      height: 110px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1500;
+      pointer-events: none;
+    }
+    .correct-toast {
+      background: #3fa865;
+      box-shadow: 0 20px 50px rgba(63, 168, 101, 0.5);
+    }
+    .wrong-toast {
+      background: #d95c5c;
+      box-shadow: 0 20px 50px rgba(217, 92, 92, 0.5);
+    }
+    .correct-toast.pop, .wrong-toast.pop { animation: toastPop 0.9s ease forwards; }
+    @keyframes toastPop {
+      0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+      30% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
+      60% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+      100% { transform: translate(-50%, -50%) scale(1.3); opacity: 0; }
+    }
+
+    @media (max-width: 600px) {
+      .start-screen { padding: 32px 22px 30px; }
+      .start-screen h1 { font-size: 1.55rem; }
+      .quiz-head { padding: 18px 20px 14px; }
+      .quiz-body { padding: 22px 20px 6px; }
+      .question-text { font-size: 1.08rem; }
+      .option-btn { padding: 13px 15px; font-size: 0.95rem; }
+      .quiz-foot { padding: 14px 20px 20px; }
+      .btn { padding: 10px 20px; font-size: 0.9rem; }
+      .result-card { padding: 32px 22px 28px; }
+      .result-score { font-size: 2.6rem; }
+      .correct-toast, .wrong-toast { width: 90px; height: 90px; font-size: 2.4rem; }
+      .section-tag { font-size: 0.68rem; padding: 4px 10px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ================= START SCREEN ================= -->
+<div class="start-screen" id="startScreen">
+  <h1>📝 Word, Databases & SQL</h1>
+  <div class="subtitle">Microsoft Word · DBMS · SQL SELECT</div>
+  <div class="info-grid">
+    <span class="info-pill">50 questions</span>
+    <span class="info-pill">Word (20)</span>
+    <span class="info-pill">Databases (20)</span>
+    <span class="info-pill">SQL (10)</span>
+  </div>
+  <p class="note">
+    Questions and answer choices are <strong>randomized</strong> each time.<br>
+    One question per screen — instant feedback after each answer.
+  </p>
+  <button class="btn btn-primary" id="startBtn" style="font-size:1.12rem; padding:14px 44px;">
+    🚀 Start Exam
+  </button>
+</div>
+
+<!-- ================= QUIZ MODAL ================= -->
+<div class="quiz-overlay" id="quizOverlay">
+  <div class="quiz-card" id="quizCard">
+    <div class="quiz-head">
+      <div class="top-row">
+        <span class="section-tag" id="sectionTag">Part I</span>
+        <span class="q-counter" id="qCounter"><strong>1</strong> / 50</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+    </div>
+
+    <div class="quiz-body" id="quizBody">
+      <div class="question-text" id="questionText"></div>
+      <div class="options-list" id="optionsList"></div>
+      <div class="feedback-banner" id="feedbackBanner"></div>
+    </div>
+
+    <div class="quiz-foot">
+      <span class="answered-info" id="answeredInfo">0 of 50 answered</span>
+      <div class="btn-group">
+        <button class="btn btn-secondary" id="prevBtn" disabled>← Back</button>
+        <button class="btn btn-primary" id="nextBtn">Next →</button>
+        <button class="btn btn-submit" id="submitBtn" style="display:none;">✅ Submit</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= RESULT SCREEN ================= -->
+<div class="result-screen" id="resultScreen">
+  <div class="result-card">
+    <div class="result-emoji" id="resultEmoji">🏆</div>
+    <h2 id="resultTitle">Exam Complete!</h2>
+    <div class="result-score" id="resultScore">0 / 50</div>
+    <div class="result-detail" id="resultDetail">You answered 0 questions correctly.</div>
+    <div class="result-percent" id="resultPercent">0%</div>
+    <div class="result-remark" id="resultRemark"></div>
+
+    <button class="review-toggle" id="reviewToggle">📋 Show answer review ▾</button>
+    <div class="review-list" id="reviewList"></div>
+
+    <div class="result-actions">
+      <button class="btn btn-secondary" id="restartBtn">🔄 Retake Exam</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function() {
+    // ==================== QUESTION BANK ====================
+    const questionBank = [
+      // PART I — MICROSOFT WORD (20 items)
+      { section: "Part I · Microsoft Word", q: "What was the original name of Microsoft Word 1.0 when it was released for MS-DOS in 1983?",
+        options: ["Multi-Tool Word", "Word Processor 1.0", "Office Writer", "WordStar DOS"], answer: 0 },
+      { section: "Part I · Microsoft Word", q: "Which pair of features did Microsoft introduce in Word in 2007?",
+        options: ["OneDrive integration and Copilot", "The Ribbon interface and the .docx file format", "WYSIWYG editing and mouse support", "Spell check and templates"], answer: 1 },
+      { section: "Part I · Microsoft Word", q: "Where is the Title Bar located in the Word window?",
+        options: ["At the bottom, beside the zoom controls", "Below the Ribbon, above the document", "At the very top of the window", "On the right side, beside the scroll bar"], answer: 2 },
+      { section: "Part I · Microsoft Word", q: "Which part of the Word window gives one-click access to frequently used commands such as Save, Undo, and Redo?",
+        options: ["Status Bar", "Ruler", "Quick Access Toolbar", "File tab"], answer: 2 },
+      { section: "Part I · Microsoft Word", q: "Which keyboard shortcut closes the current document in Word?",
+        options: ["Ctrl + Q", "Ctrl + W", "Ctrl + X", "Ctrl + P"], answer: 1 },
+      { section: "Part I · Microsoft Word", q: "Which keyboard shortcut redoes the last action that was undone?",
+        options: ["Ctrl + Z", "Ctrl + R", "Ctrl + X", "Ctrl + Y"], answer: 3 },
+      { section: "Part I · Microsoft Word", q: "What is the main purpose of the Ribbon in Microsoft Word?",
+        options: ["To display the page number and word count", "To serve as the main command center, organized into tabs and groups", "To show the file name and window controls", "To move up and down through a document"], answer: 1 },
+      { section: "Part I · Microsoft Word", q: "Which of the following can be done in Backstage View?",
+        options: ["Set margins using the margin markers", "Format text using the Font group", "Switch between Read Mode and Print Layout", "Create, open, save, print, and share documents"], answer: 3 },
+      { section: "Part I · Microsoft Word", q: "Which set lists the views you can choose using the View Buttons near the Status Bar?",
+        options: ["Read Mode, Print Layout, and Web Layout", "Draft, Outline, and Backstage", "Home, Insert, and Design", "Normal, Slide Sorter, and Notes"], answer: 0 },
+      { section: "Part I · Microsoft Word", q: "What is the Document Area (Workspace) in Word?",
+        options: ["The bar that shows the page number and language", "The toolbar that holds Save, Undo, and Redo", "The row of tabs such as Home and Insert", "The large white space where you type and edit your document"], answer: 3 },
+      { section: "Part I · Microsoft Word", q: "Which statement correctly describes the evolution of Microsoft Word?",
+        options: ["It was first released for Windows in 1983 and for MS-DOS in 1989.", "It began on MS-DOS in 1983, reached Macintosh in 1985 and Windows in 1989, and later became cloud-connected in Microsoft 365.", "It became part of Microsoft 365 in 1990 and was later moved to MS-DOS.", "It has remained a desktop-only program with no cloud features since 1983."], answer: 1 },
+      { section: "Part I · Microsoft Word", q: "What does the shortcut Ctrl + I do to selected text?",
+        options: ["Underlines it", "Makes it bold", "Italicizes it", "Indents it"], answer: 2 },
+      { section: "Part I · Microsoft Word", q: "Which pair of shortcuts should you press to make a selected heading bold and underlined?",
+        options: ["Ctrl + B and Ctrl + U", "Ctrl + I and Ctrl + U", "Ctrl + B and Ctrl + I", "Ctrl + U and Ctrl + L"], answer: 0 },
+      { section: "Part I · Microsoft Word", q: "Which shortcut should you press to center-align a paragraph such as a title?",
+        options: ["Ctrl + L", "Ctrl + R", "Ctrl + J", "Ctrl + E"], answer: 3 },
+      { section: "Part I · Microsoft Word", q: "Which shortcut moves the cursor to the end of the document?",
+        options: ["Ctrl + End", "Ctrl + Home", "Ctrl + Arrow Key", "Ctrl + A"], answer: 0 },
+      { section: "Part I · Microsoft Word", q: "Which shortcut should you press to open the Find and Replace dialog?",
+        options: ["Ctrl + F", "Ctrl + A", "Ctrl + H", "Ctrl + R"], answer: 2 },
+      { section: "Part I · Microsoft Word", q: "Which part of the Word interface should you use to set the indents and tab stops of a paragraph?",
+        options: ["Status Bar", "Ruler", "Title Bar", "Scroll Bars"], answer: 1 },
+      { section: "Part I · Microsoft Word", q: "Which sequence lists these Word milestones from earliest to latest?",
+        options: ["Ribbon and .docx (2007) → MS-DOS release (1983) → Microsoft 365 (2016)", "Microsoft 365 (2016) → MS-DOS release (1983) → Ribbon and .docx (2007)", "MS-DOS release (1983) → Microsoft 365 (2016) → Ribbon and .docx (2007)", "MS-DOS release (1983) → Ribbon and .docx (2007) → Microsoft 365 (2016)"], answer: 3 },
+      { section: "Part I · Microsoft Word", q: "Which statement correctly distinguishes the Quick Access Toolbar from the Ribbon?",
+        options: ["The Quick Access Toolbar is a customizable toolbar for frequently used commands, while the Ribbon organizes commands into tabs and groups.", "The Quick Access Toolbar is the main command center of Word, while the Ribbon holds only Save, Undo, and Redo.", "The Quick Access Toolbar opens Backstage View, while the Ribbon shows the word count.", "The Quick Access Toolbar and the Ribbon are the same part shown in two places."], answer: 0 },
+      { section: "Part I · Microsoft Word", q: "Which of the following is the most efficient way to change a misspelled word that appears many times in a long document?",
+        options: ["Scroll through the pages and retype each one", "Press Ctrl + A, then retype the whole document", "Press Ctrl + H and use Find and Replace", "Open Backstage View and print the document"], answer: 2 },
+
+      // PART II — DATABASES / DBMS (20 items)
+      { section: "Part II · Databases", q: "What is the software that manages a database and mediates between users, applications, and the data?",
+        options: ["SQL", "DBMS", "Table", "Index"], answer: 1 },
+      { section: "Part II · Databases", q: "Which database characteristic means that data outlives the program that created it?",
+        options: ["Organized", "Shared", "Secure", "Persistent"], answer: 3 },
+      { section: "Part II · Databases", q: "Which statement correctly differentiates a database from a DBMS?",
+        options: ["A database is the organized collection of data, while a DBMS is the software that manages it.", "A database is the software that manages data, while a DBMS is the collection of data.", "A database and a DBMS are exactly the same thing.", "A database only stores programs, while a DBMS only stores tables."], answer: 0 },
+      { section: "Part II · Databases", q: "Which statement correctly compares relational and NoSQL databases?",
+        options: ["Relational databases store data as documents, while NoSQL databases store data in related tables.", "Both relational and NoSQL databases require tables with fixed relationships.", "Relational databases store data in related tables of rows and columns, while NoSQL databases use other data models such as document, key-value, or graph.", "NoSQL databases are designed for SQL, while relational databases are not."], answer: 2 },
+      { section: "Part II · Databases", q: "Which database type is the best fit for an application that stores customers, orders, and payments in related tables?",
+        options: ["Document database such as MongoDB", "Key-value store such as Redis", "Relational database such as MySQL", "Graph database such as Neo4j"], answer: 2 },
+      { section: "Part II · Databases", q: "Which pair of terms refers to the columns of a database table?",
+        options: ["Records and tuples", "Fields and attributes", "Views and indexes", "Keys and triggers"], answer: 1 },
+      { section: "Part II · Databases", q: "What is a view in a database?",
+        options: ["A virtual table defined by a saved query", "A copy of a table stored separately", "A structure that speeds up lookups", "A procedure that runs automatically"], answer: 0 },
+      { section: "Part II · Databases", q: "What is the main purpose of an index?",
+        options: ["To define a saved query", "To enforce business rules automatically", "To store reusable SQL code", "To speed up data retrieval"], answer: 3 },
+      { section: "Part II · Databases", q: "Why are views useful for security?",
+        options: ["They encrypt every table in the database.", "They let users see only selected rows or columns of a table.", "They delete sensitive data after it is queried.", "They create a backup of the database."], answer: 1 },
+      { section: "Part II · Databases", q: "Why does an index make SELECT queries faster on large tables?",
+        options: ["The engine can locate rows without scanning the whole table.", "The engine stores a second copy of every row in a view.", "The engine runs a trigger before each query.", "The engine removes the columns that are not needed."], answer: 0 },
+      { section: "Part II · Databases", q: "Which statement about stored procedures and triggers is correct?",
+        options: ["A trigger is invoked by name using CALL, while a stored procedure runs automatically on INSERT, UPDATE, or DELETE.", "Both are invoked by name using CALL.", "A stored procedure is invoked by name using CALL, while a trigger runs automatically when events such as INSERT, UPDATE, or DELETE occur.", "Neither can be saved inside the database."], answer: 2 },
+      { section: "Part II · Databases", q: "Which statement is correct about a Customers table that has the columns CustomerID, FirstName, LastName, and Email and stores three customers?",
+        options: ["It has 3 columns and 4 rows.", "It has 4 columns and 3 rows.", "It has 12 columns and 1 row.", "It has 4 columns and 4 rows."], answer: 1 },
+      { section: "Part II · Databases", q: "Which database object should be created so that every change to a customer's email is automatically recorded in an AuditLog table?",
+        options: ["View", "Index", "Stored procedure", "Trigger"], answer: 3 },
+      { section: "Part II · Databases", q: "Which statement best analyzes the trade-off of adding an index to a table?",
+        options: ["It speeds up INSERT, UPDATE, and DELETE but slows down SELECT.", "It has no effect on any operation.", "It speeds up SELECT queries but slows down INSERT, UPDATE, and DELETE because the index must also be updated.", "It slows down both reads and writes but saves storage space."], answer: 2 },
+      { section: "Part II · Databases", q: "Which list correctly matches each database object to its role?",
+        options: ["Tables present data, Views store data, Indexes automate tasks, Procedures speed up retrieval, Triggers hold rows.", "Tables store data, Views present it, Indexes speed it up, Procedures automate it, Triggers react to it.", "Tables speed up data, Views react to changes, Indexes store data, Procedures present it, Triggers automate it.", "Tables react to events, Views store data, Indexes present data, Procedures speed up retrieval, Triggers automate it."], answer: 1 },
+      { section: "Part II · Databases", q: "What is the term used for opening a database?",
+        options: ["Disconnecting", "Indexing", "Triggering", "Connecting"], answer: 3 },
+      { section: "Part II · Databases", q: "Which of the following is NOT typically required to connect to a database server?",
+        options: ["The host or server address", "The database name", "The total number of rows in the database", "The username and password"], answer: 2 },
+      { section: "Part II · Databases", q: "Why should a client close a database connection when it is finished?",
+        options: ["It frees server resources, releases locks, and ends the authenticated session.", "It deletes the data stored in the database.", "It automatically creates an index on every table.", "It converts the database into a view."], answer: 0 },
+      { section: "Part II · Databases", q: "Which sequence correctly describes how a connection is established?",
+        options: ["The server verifies the credentials → the client sends a request → a session is established.", "A session is established → the client sends credentials → the server verifies them.", "The client sends a disconnect command → the server ends the session → resources are freed.", "The client sends a request with credentials → the server verifies credentials and permissions → a session is established."], answer: 3 },
+      { section: "Part II · Databases", q: "Which command closes the connection in the PostgreSQL command-line client psql?",
+        options: ["USE", "\\q", "CALL", "SELECT"], answer: 1 },
+
+      // PART III — SQL SELECT (10 items)
+      { section: "Part III · SQL SELECT", q: "What is the purpose of the SELECT statement in SQL?",
+        options: ["To retrieve data from one or more tables", "To delete rows from a table", "To create a new database", "To close a connection"], answer: 0 },
+      { section: "Part III · SQL SELECT", q: "Which statement correctly describes the FROM and WHERE clauses?",
+        options: ["FROM filters the rows, and WHERE names the table.", "FROM sorts the rows, and WHERE removes duplicates.", "FROM names the table to read, and WHERE filters the rows that are returned.", "FROM lists the columns, and WHERE names the database."], answer: 2 },
+      { section: "Part III · SQL SELECT", q: "Which of the following shows the correct order of clauses in a basic SELECT statement?",
+        options: ["SELECT, FROM, WHERE, ORDER BY", "FROM, SELECT, WHERE, ORDER BY", "SELECT, WHERE, FROM, ORDER BY", "WHERE, SELECT, FROM, ORDER BY"], answer: 0 },
+      { section: "Part III · SQL SELECT", q: "What is the difference between SELECT * FROM Students; and SELECT FirstName, LastName FROM Students;?",
+        options: ["Both return exactly the same result.", "The first returns only rows, and the second returns only columns.", "The first returns two columns, and the second returns all columns.", "The first returns all columns, and the second returns only FirstName and LastName."], answer: 3 },
+      { section: "Part III · SQL SELECT", q: "Which query displays only the FirstName and Course of every student?",
+        options: ["SELECT FirstName, Course FROM Students;", "SELECT * FROM FirstName, Course;", "FROM Students SELECT FirstName, Course;", "SELECT FirstName Course FROM Students;"], answer: 0 },
+      { section: "Part III · SQL SELECT", q: "Which query retrieves all columns of the students whose Course is BSIT and whose Grade is greater than 85?",
+        options: ["SELECT * FROM Students WHERE Course = BSIT OR Grade > 85;", "SELECT * FROM Students WHERE Course = 'BSIT' OR Grade > 85;", "SELECT * FROM Students WHERE Course = 'BSIT' AND Grade > 85;", "SELECT Course, Grade FROM Students WHERE Course = 'BSIT';"], answer: 2 },
+      { section: "Part III · SQL SELECT", q: "Which query lists the FirstName and Grade of all students from the highest to the lowest Grade?",
+        options: ["SELECT FirstName, Grade FROM Students ORDER BY Grade ASC;", "SELECT FirstName, Grade FROM Students ORDER BY Grade DESC;", "SELECT FirstName, Grade FROM Students WHERE Grade DESC;", "SELECT FirstName, Grade ORDER BY Grade DESC FROM Students;"], answer: 1 },
+      { section: "Part III · SQL SELECT", q: "What will SELECT FirstName FROM Students WHERE Course = 'BSCS'; return?",
+        options: ["Carla and Dan", "Ana, Ben, and Ella", "Carla only", "All five first names"], answer: 0 },
+      { section: "Part III · SQL SELECT", q: "Which statement identifies the error in SELECT FirstName, LastName WHERE Course = 'BSIT';?",
+        options: ["The comma between the columns must be removed.", "'BSIT' must not be written in quotes.", "WHERE must be placed before SELECT.", "The FROM clause that names the table is missing."], answer: 3 },
+      { section: "Part III · SQL SELECT", q: "Which query best produces an alphabetical list of the different courses in the Students table, with no repeats?",
+        options: ["SELECT Course FROM Students;", "SELECT DISTINCT Course FROM Students ORDER BY Course;", "SELECT DISTINCT * FROM Students;", "SELECT Course FROM Students ORDER BY Grade DESC;"], answer: 1 }
+    ];
+
+    // ==================== STATE ====================
+    let questions = [];
+    let selected = [];
+    let revealed = [];
+    let currentIdx = 0;
+    let submitted = false;
+    let answeredCount = 0;
+
+    // ==================== DOM ====================
+    const startScreen = document.getElementById('startScreen');
+    const startBtn = document.getElementById('startBtn');
+    const quizOverlay = document.getElementById('quizOverlay');
+    const sectionTag = document.getElementById('sectionTag');
+    const qCounter = document.getElementById('qCounter');
+    const progressFill = document.getElementById('progressFill');
+    const questionText = document.getElementById('questionText');
+    const optionsList = document.getElementById('optionsList');
+    const feedbackBanner = document.getElementById('feedbackBanner');
+    const answeredInfo = document.getElementById('answeredInfo');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const submitBtn = document.getElementById('submitBtn');
+    const quizBody = document.getElementById('quizBody');
+
+    const resultScreen = document.getElementById('resultScreen');
+    const resultEmoji = document.getElementById('resultEmoji');
+    const resultTitle = document.getElementById('resultTitle');
+    const resultScore = document.getElementById('resultScore');
+    const resultDetail = document.getElementById('resultDetail');
+    const resultPercent = document.getElementById('resultPercent');
+    const resultRemark = document.getElementById('resultRemark');
+    const reviewToggle = document.getElementById('reviewToggle');
+    const reviewList = document.getElementById('reviewList');
+    const restartBtn = document.getElementById('restartBtn');
+
+    // ==================== SHUFFLE HELPERS ====================
+    function shuffleArray(arr) {
+      const a = arr.slice();
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function buildRandomizedQuestions() {
+      const shuffled = shuffleArray(questionBank);
+      return shuffled.map(item => {
+        const correctText = item.options[item.answer];
+        const shuffledOptions = shuffleArray(item.options);
+        return {
+          section: item.section,
+          q: item.q,
+          options: shuffledOptions,
+          answer: shuffledOptions.indexOf(correctText)
+        };
+      });
+    }
+
+    // ==================== TOASTS ====================
+    function showCorrectToast() {
+      const toast = document.createElement('div');
+      toast.className = 'correct-toast';
+      toast.textContent = '✓';
+      document.body.appendChild(toast);
+      void toast.offsetWidth;
+      toast.classList.add('pop');
+      setTimeout(() => toast.remove(), 1000);
+    }
+
+    function showWrongToast() {
+      const toast = document.createElement('div');
+      toast.className = 'wrong-toast';
+      toast.textContent = '✗';
+      document.body.appendChild(toast);
+      void toast.offsetWidth;
+      toast.classList.add('pop');
+      setTimeout(() => toast.remove(), 1000);
+    }
+
+    // ==================== RENDER ====================
+    function renderQuestion() {
+      const item = questions[currentIdx];
+      const total = questions.length;
+      const isRevealed = revealed[currentIdx];
+
+      sectionTag.textContent = item.section;
+      sectionTag.title = item.section;
+      qCounter.innerHTML = `<strong>${currentIdx + 1}</strong> / ${total}`;
+
+      const pct = ((currentIdx + 1) / total) * 100;
+      progressFill.style.width = pct + '%';
+
+      questionText.textContent = item.q;
+
+      optionsList.innerHTML = '';
+      item.options.forEach((optText, optIdx) => {
+        const btn = document.createElement('button');
+        btn.className = 'option-btn';
+        btn.type = 'button';
+        const letter = String.fromCharCode(65 + optIdx);
+        const isSelected = selected[currentIdx] === optIdx;
+
+        if (isSelected) btn.classList.add('selected');
+
+        if (isRevealed) {
+          btn.disabled = true;
+          if (optIdx === item.answer) {
+            btn.classList.add('correct');
+          } else if (isSelected) {
+            btn.classList.add('wrong');
+          }
+        }
+
+        let iconHtml = '';
+        if (isRevealed) {
+          if (optIdx === item.answer) {
+            iconHtml = '<span class="option-icon">✅</span>';
+          } else if (isSelected) {
+            iconHtml = '<span class="option-icon">❌</span>';
+          }
+        }
+
+        btn.innerHTML = `<span class="option-letter">${letter}</span><span class="option-text">${escapeHtml(optText)}</span>${iconHtml}`;
+
+        if (!isRevealed) {
+          btn.addEventListener('click', () => selectOption(optIdx));
+        }
+
+        optionsList.appendChild(btn);
+      });
+
+      if (isRevealed) {
+        const isCorrect = selected[currentIdx] === item.answer;
+        const correctLetter = String.fromCharCode(65 + item.answer);
+        feedbackBanner.className = 'feedback-banner show ' + (isCorrect ? 'correct-fb' : 'wrong-fb');
+        if (isCorrect) {
+          feedbackBanner.innerHTML = `
+            <span class="fb-icon">🎉</span>
+            <div class="fb-text">
+              <strong>Correct!</strong>
+              <span>Great job — that's the right answer.</span>
+            </div>
+          `;
+        } else {
+          feedbackBanner.innerHTML = `
+            <span class="fb-icon">📌</span>
+            <div class="fb-text">
+              <strong>Incorrect</strong>
+              <span>The correct answer is <strong>${correctLetter}</strong> — highlighted in green above.</span>
+            </div>
+          `;
+        }
+      } else {
+        feedbackBanner.className = 'feedback-banner';
+        feedbackBanner.innerHTML = '';
+      }
+
+      answeredCount = revealed.filter(v => v === true).length;
+      answeredInfo.textContent = `${answeredCount} of ${total} answered`;
+
+      prevBtn.disabled = currentIdx === 0 || submitted;
+      nextBtn.style.display = (currentIdx < total - 1 && !submitted) ? 'inline-flex' : 'none';
+      submitBtn.style.display = (currentIdx === total - 1 && !submitted) ? 'inline-flex' : 'none';
+
+      if (isRevealed) {
+        nextBtn.classList.add('btn-next-pulse');
+      } else {
+        nextBtn.classList.remove('btn-next-pulse');
+      }
+
+      quizBody.scrollTop = 0;
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    // ==================== SELECT ====================
+    function selectOption(optIdx) {
+      if (revealed[currentIdx] || submitted) return;
+
+      selected[currentIdx] = optIdx;
+      revealed[currentIdx] = true;
+
+      const item = questions[currentIdx];
+      const isCorrect = optIdx === item.answer;
+
+      renderQuestion();
+
+      if (isCorrect) {
+        showCorrectToast();
+      } else {
+        showWrongToast();
+      }
+    }
+
+    // ==================== NAVIGATION ====================
+    function goNext() {
+      if (currentIdx < questions.length - 1) {
+        currentIdx++;
+        renderQuestion();
+      }
+    }
+
+    function goPrev() {
+      if (currentIdx > 0) {
+        currentIdx--;
+        renderQuestion();
+      }
+    }
+
+    // ==================== SUBMIT ====================
+    function submitExam() {
+      if (submitted) return;
+      const unanswered = revealed.filter(v => v !== true).length;
+      if (unanswered > 0) {
+        if (!confirm(`You have ${unanswered} unanswered question(s). Submit anyway?`)) return;
+      }
+
+      submitted = true;
+
+      let correct = 0;
+      questions.forEach((item, idx) => {
+        if (selected[idx] === item.answer) correct++;
+      });
+
+      const total = questions.length;
+      const pct = Math.round((correct / total) * 100);
+
+      quizOverlay.classList.remove('active');
+      showResult(correct, total, pct);
+    }
+
+    // ==================== RESULT ====================
+    function showResult(correct, total, pct) {
+      resultScore.textContent = `${correct} / ${total}`;
+      resultDetail.textContent = `You answered ${correct} out of ${total} questions correctly.`;
+      resultPercent.textContent = `${pct}%`;
+
+      let emoji, title, remark;
+      if (pct >= 90) {
+        emoji = '🏆'; title = 'Outstanding!';
+        remark = 'Excellent! You have mastered Microsoft Word essentials, database concepts, and SQL SELECT fundamentals.';
+      } else if (pct >= 75) {
+        emoji = '🎉'; title = 'Great Job!';
+        remark = 'Good work! You have a strong grasp of the material. Review a few shortcut keys or SQL clause details to reach full mastery.';
+      } else if (pct >= 50) {
+        emoji = '📘'; title = 'Not Bad!';
+        remark = 'You are on the right track. Revisit Word interface parts, database objects, and SQL query syntax, then try again.';
+      } else {
+        emoji = '📖'; title = 'Keep Learning!';
+        remark = 'Don\'t worry — review the fundamentals of Word, databases, and SQL SELECT statements, then retake the exam.';
+      }
+
+      resultEmoji.textContent = emoji;
+      resultTitle.textContent = title;
+      resultRemark.textContent = remark;
+
+      reviewList.innerHTML = '';
+      questions.forEach((item, idx) => {
+        const isCorrect = selected[idx] === item.answer;
+        const yourLetter = (selected[idx] !== null && selected[idx] !== undefined) ? String.fromCharCode(65 + selected[idx]) : '—';
+        const correctLetter = String.fromCharCode(65 + item.answer);
+        const statusClass = isCorrect ? 'ok' : 'bad';
+        const statusText = isCorrect ? '✓ Correct' : '✗ Incorrect';
+
+        const div = document.createElement('div');
+        div.className = 'review-item';
+        div.innerHTML = `
+          <div class="rv-q">${idx + 1}. ${escapeHtml(item.q)}</div>
+          <div><span class="rv-status ${statusClass}">${statusText}</span> · Your answer: <strong>${yourLetter}</strong> · Correct: <strong>${correctLetter}</strong></div>
+        `;
+        reviewList.appendChild(div);
+      });
+
+      reviewToggle.textContent = '📋 Show answer review ▾';
+      reviewList.classList.remove('show');
+
+      resultScreen.classList.add('active');
+
+      if (pct >= 75) {
+        launchConfetti();
+      }
+    }
+
+    function launchConfetti() {
+      const colors = ['#2b6f9e', '#4a8bb8', '#6ab0e8', '#d98c2e', '#5aab74', '#e8b86a'];
+      for (let i = 0; i < 60; i++) {
+        const piece = document.createElement('div');
+        piece.className = 'confetti';
+        piece.style.left = Math.random() * 100 + 'vw';
+        piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+        piece.style.width = (6 + Math.random() * 8) + 'px';
+        piece.style.height = (6 + Math.random() * 8) + 'px';
+        piece.style.animationDuration = (2.5 + Math.random() * 2) + 's';
+        piece.style.animationDelay = (Math.random() * 0.6) + 's';
+        piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+        document.body.appendChild(piece);
+        setTimeout(() => piece.remove(), 6000);
+      }
+    }
+
+    // ==================== START ====================
+    function startExam() {
+      submitted = false;
+      currentIdx = 0;
+      questions = buildRandomizedQuestions();
+      selected = new Array(questions.length).fill(null);
+      revealed = new Array(questions.length).fill(false);
+      answeredCount = 0;
+
+      startScreen.style.display = 'none';
+      resultScreen.classList.remove('active');
+      quizOverlay.classList.add('active');
+
+      renderQuestion();
+    }
+
+    // ==================== EVENTS ====================
+    startBtn.addEventListener('click', startExam);
+    prevBtn.addEventListener('click', goPrev);
+    nextBtn.addEventListener('click', goNext);
+    submitBtn.addEventListener('click', submitExam);
+
+    reviewToggle.addEventListener('click', () => {
+      const isShown = reviewList.classList.toggle('show');
+      reviewToggle.textContent = isShown ? '📋 Hide answer review ▴' : '📋 Show answer review ▾';
+      if (isShown) reviewList.scrollTop = 0;
+    });
+
+    restartBtn.addEventListener('click', () => {
+      resultScreen.classList.remove('active');
+      startExam();
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (!quizOverlay.classList.contains('active')) return;
+      if (submitted) return;
+
+      const key = e.key.toUpperCase();
+      if (['A', 'B', 'C', 'D'].includes(key)) {
+        if (!revealed[currentIdx]) {
+          const optIdx = key.charCodeAt(0) - 65;
+          const buttons = optionsList.querySelectorAll('.option-btn');
+          if (buttons[optIdx] && !buttons[optIdx].disabled) {
+            selectOption(optIdx);
+          }
+        }
+      }
+      if (e.key === 'ArrowRight') {
+        if (currentIdx < questions.length - 1) goNext();
+      }
+      if (e.key === 'ArrowLeft') {
+        if (currentIdx > 0) goPrev();
+      }
+    });
+  })();
+</script>
+</body>
+</html>
